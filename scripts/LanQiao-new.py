@@ -2,6 +2,7 @@ import os
 import sys
 
 def create_lq_problem():
+    print("新建题目模板 - Lanqiao（蓝桥）")
     # 1. 直接获取手动输入
     title = input("请输入题目名称: ").strip()
     raw_link = input("请输入题目链接: ").strip()
