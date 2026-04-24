@@ -109,7 +109,7 @@ def create_leetcode_problem():
     py_file = os.path.join(problem_path, "Solution.py")
     if not os.path.exists(py_file):
         with open(py_file, "w", encoding="utf-8") as file:
-            file.write(f"# {link}\n\n")
+            file.write(f"# {link}\n\n\n")
             file.write("class Solution:\n")
             file.write("    pass\n")
         print("已创建代码文件: Solution.py")
