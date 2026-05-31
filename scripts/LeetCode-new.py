@@ -51,13 +51,15 @@ def read_clipboard_bytes(format_id):
 
 def get_clipboard_text():
     # 纯文本格式里直接保存着题目标题。
-    return read_clipboard_bytes(CF_UNICODETEXT).decode("utf-16-le").rstrip("\x00").strip()
+    return (
+        read_clipboard_bytes(CF_UNICODETEXT).decode('utf-16-le').rstrip('\x00').strip()
+    )
 
 
 def get_clipboard_html():
     # HTML 格式里包含了题目标题对应的 href。
-    html_format = user32.RegisterClipboardFormatW("HTML Format")
-    return read_clipboard_bytes(html_format).decode("utf-8").rstrip("\x00")
+    html_format = user32.RegisterClipboardFormatW('HTML Format')
+    return read_clipboard_bytes(html_format).decode('utf-8').rstrip('\x00')
 
 
 def get_problem_from_clipboard():
@@ -66,11 +68,11 @@ def get_problem_from_clipboard():
     html = get_clipboard_html()
     match = re.search(r'href="([^"]+)"', html)
     if not match:
-        print("未识别到力扣题目链接，请先复制力扣题目描述中的标题。")
-        print(f"当前剪贴板标题: {title or '<空>'}")
-        preview = html[:200].replace("\n", "\\n")
-        print(f"当前剪贴板 HTML 前 200 个字符: {preview or '<空>'}")
-        raise ValueError("剪贴板中没有找到题目链接")
+        print('未识别到力扣题目链接，请先复制力扣题目描述中的标题。')
+        print(f'当前剪贴板标题: {title or "<空>"}')
+        preview = html[:200].replace('\n', '\\n')
+        print(f'当前剪贴板 HTML 前 200 个字符: {preview or "<空>"}')
+        raise ValueError('剪贴板中没有找到题目链接')
 
     link = match.group(1).strip()
     return title, link
@@ -85,10 +87,10 @@ def resolve_problem_path(base_dir, title):
         if not os.path.exists(problem_path):
             return current_title, problem_path
 
-        print(f"文件夹已存在: {problem_path}")
-        new_title = input("请输入新的题目名称: ").strip()
+        print(f'文件夹已存在: {problem_path}')
+        new_title = input('请输入新的题目名称: ').strip()
         if not new_title:
-            print("名称不能为空，请重新输入。")
+            print('名称不能为空，请重新输入。')
             continue
         current_title = new_title
 
@@ -96,34 +98,40 @@ def resolve_problem_path(base_dir, title):
 def create_leetcode_problem():
     # 从剪贴板识别题目信息后，创建题目目录与两个模板文件。
     title, link = get_problem_from_clipboard()
-    print(f"已识别题目: {title}")
-    print(f"已识别链接: {link}")
+    print(f'已识别题目: {title}')
+    print(f'已识别链接: {link}')
+
+    # 自动将标题开头的题号补齐为 4 位数
+    match = re.match(r'^(\d+)\.(.*)$', title)
+    if match:
+        num_str, rest = match.groups()
+        title = f'{num_str.zfill(4)}.{rest}'
 
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    base_dir = os.path.join(project_root, "LeetCode")
+    base_dir = os.path.join(project_root, 'LeetCode')
     title, problem_path = resolve_problem_path(base_dir, title)
 
     os.makedirs(problem_path, exist_ok=True)
-    print(f"已创建文件夹: {problem_path}")
+    print(f'已创建文件夹: {problem_path}')
 
-    py_file = os.path.join(problem_path, "Solution.py")
+    py_file = os.path.join(problem_path, 'Solution.py')
     if not os.path.exists(py_file):
-        with open(py_file, "w", encoding="utf-8") as file:
-            file.write(f"# {link}\n\n\n")
-            file.write("class Solution:\n")
-            file.write("    pass\n")
-        print("已创建代码文件: Solution.py")
+        with open(py_file, 'w', encoding='utf-8') as file:
+            file.write(f'# {link}\n\n\n')
+            file.write('class Solution:\n')
+            file.write('    pass\n')
+        print('已创建代码文件: Solution.py')
 
-    md_file = os.path.join(problem_path, "README.md")
+    md_file = os.path.join(problem_path, 'README.md')
     if not os.path.exists(md_file):
-        with open(md_file, "w", encoding="utf-8") as file:
-            file.write(f"# {title}\n\n")
-            file.write(f"[题目链接]({link})\n\n")
-            file.write("---\n\n")
-            file.write("解题思路：\n")
-        print("已创建说明文件: README.md")
+        with open(md_file, 'w', encoding='utf-8') as file:
+            file.write(f'# {title}\n\n')
+            file.write(f'[题目链接]({link})\n\n')
+            file.write('---\n\n')
+            file.write('解题思路：\n')
+        print('已创建说明文件: README.md')
 
 
-if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding="utf-8")
+if __name__ == '__main__':
+    sys.stdout.reconfigure(encoding='utf-8')
     create_leetcode_problem()
