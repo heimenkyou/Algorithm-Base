@@ -51,25 +51,27 @@ def read_clipboard_bytes(format_id):
 
 def get_problem_from_clipboard():
     # 纯文本里直接是题目标题。
-    title = read_clipboard_bytes(CF_UNICODETEXT).decode("utf-16-le").rstrip("\x00").strip()
+    title = (
+        read_clipboard_bytes(CF_UNICODETEXT).decode('utf-16-le').rstrip('\x00').strip()
+    )
 
     # 力扣复制标题时，HTML 里会带有 href，可以直接提取题目链接。
-    html_format = user32.RegisterClipboardFormatW("HTML Format")
-    html = read_clipboard_bytes(html_format).decode("utf-8").rstrip("\x00")
+    html_format = user32.RegisterClipboardFormatW('HTML Format')
+    html = read_clipboard_bytes(html_format).decode('utf-8').rstrip('\x00')
     match = re.search(r'href="([^"]+)"', html)
     if not match:
-        print("未识别到力扣题目链接，请先复制力扣题目描述中的标题。")
-        print(f"当前剪贴板标题: {title or '<空>'}")
-        preview = html[:200].replace("\n", "\\n")
-        print(f"当前剪贴板 HTML 前 200 个字符: \n{preview or '<空>'}\n")
-        raise ValueError("剪贴板中没有找到题目链接")
+        print('未识别到力扣题目链接，请先复制力扣题目描述中的标题。')
+        print(f'当前剪贴板标题: {title or "<空>"}')
+        preview = html[:200].replace('\n', '\\n')
+        print(f'当前剪贴板 HTML 前 200 个字符: \n{preview or "<空>"}\n')
+        raise ValueError('剪贴板中没有找到题目链接')
 
     link = match.group(1)
     return title, link
 
 
-if __name__ == "__main__":
-    sys.stdout.reconfigure(encoding="utf-8")
+if __name__ == '__main__':
+    sys.stdout.reconfigure(encoding='utf-8')
     title, link = get_problem_from_clipboard()
-    print("title:", title)
-    print("link:", link)
+    print('title:', title)
+    print('link:', link)
